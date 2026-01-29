@@ -24,11 +24,11 @@ export default function Aptitude({ data: aptData }) {
     datasets: [
       {
         data: [
-          aptData.aptitude,
-          aptData.core,
-          aptData.verbal,
-          aptData.programming,
-          aptData.comprehension
+          aptData.aptitude || 0,
+          aptData.core || 0,
+          aptData.verbal || 0,
+          aptData.programming || 0,
+          aptData.comprehension || 0
         ],
         backgroundColor: [
           "#6366f1",
@@ -88,15 +88,15 @@ export default function Aptitude({ data: aptData }) {
 
         {/* Score list */}
         <div className="mt-4 lg:mt-0 space-y-4">
-          <ScoreRow label="Aptitude" value={`${aptData.aptitude}/10`} />
-          <ScoreRow label="Core" value={`${aptData.core}/10`} />
-          <ScoreRow label="Verbal" value={`${aptData.verbal}/10`} />
-          <ScoreRow label="Programming" value={`${aptData.programming}/10`} />
-          <ScoreRow label="Comprehension" value={`${aptData.comprehension}/10`} />
+          <ScoreRow label="Aptitude" value={`${aptData.aptitude || 0}/10`} />
+          <ScoreRow label="Core" value={`${aptData.core || 0}/10`} />
+          <ScoreRow label="Verbal" value={`${aptData.verbal || 0}/10`} />
+          <ScoreRow label="Programming" value={`${aptData.programming || 0}/10`} />
+          <ScoreRow label="Comprehension" value={`${aptData.comprehension || 0}/10`} />
 
           {/* Mobile total */}
           <div className="lg:hidden text-center pt-3 font-semibold text-sm border-t border-gray-200">
-            Total: {aptData.total} / 50
+            Total: {aptData.total || 0} / 50
           </div>
         </div>
       </div>

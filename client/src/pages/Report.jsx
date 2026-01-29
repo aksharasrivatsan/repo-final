@@ -1,5 +1,5 @@
-import { useState } from "react";
-import { useLocation, Navigate } from "react-router-dom";
+import { useState, useEffect } from "react";
+import { useLocation, Navigate, useNavigate } from "react-router-dom";
 import TopSection from "../components/TopSection";
 import TotalScore from "../components/Totalscore";
 import Aptitude from "../components/Aptitude";
@@ -9,8 +9,43 @@ import PdfPreviewModal from "../components/PdfPreviewModal";
 
 export default function Report() {
   const location = useLocation();
-  const user = location.state;
+  const navigate = useNavigate();
+  const [user, setUser] = useState(location.state);
+  const [loading, setLoading] = useState(!location.state);
   const [showPdfModal, setShowPdfModal] = useState(false);
+
+  useEffect(() => {
+    if (!user) {
+      const token = sessionStorage.getItem("token");
+      if (!token) {
+        navigate("/");
+        return;
+      }
+
+      import("axios").then((axios) => {
+        axios.default
+          .get("http://localhost:5000/api/auth/dashboard", {
+            headers: { Authorization: `Bearer ${token}` },
+          })
+          .then((res) => {
+            setUser({ ...res.data.user, ...res.data.results });
+            setLoading(false);
+          })
+          .catch((err) => {
+            console.error(err);
+            navigate("/");
+          });
+      });
+    }
+  }, [user, navigate]);
+
+  if (loading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-gray-50 text-indigo-600">
+        Loading...
+      </div>
+    );
+  }
 
   if (!user) {
     return <Navigate to="/" replace />;
@@ -19,7 +54,7 @@ export default function Report() {
   // Transform database flat columns into structured data for components
   const data = {
     profile: {
-      username: user.username,
+      username: user.name,
       email: user.email,
       regNo: user.regno,
       dept: user.dept,
@@ -33,15 +68,14 @@ export default function Report() {
       comprehension: user.comprehension,
     },
     gd: {
-      total: user.gd_total,
-      subject_knowledge: user.gd_subject_knowledge,
-      communication_skills: user.gd_communication_skills,
-      body_language: user.gd_body_language,
-      listening_skills: user.gd_listening_skills,
-      active_participation: user.gd_active_participation,
-      topic: user.gd_topic,
+      total: user.gd_total || ((user.subject_knowledge || 0) + (user.communication_skills || 0) + (user.body_language || 0) + (user.listening_skills || 0) + (user.active_participation || 0)),
+      subject_knowledge: user.subject_knowledge,
+      communication_skills: user.communication_skills,
+      body_language: user.body_language,
+      listening_skills: user.listening_skills,
+      active_participation: user.active_participation,
     },
-    overallTotal: user.overall_total || ((user.aptitude || 0) + (user.core || 0) + (user.verbal || 0) + (user.programming || 0) + (user.comprehension || 0) + (user.gd_total || 0)),
+    overallTotal: user.overall_total || ((user.aptitude || 0) + (user.core || 0) + (user.verbal || 0) + (user.programming || 0) + (user.comprehension || 0) + (user.subject_knowledge || 0) + (user.communication_skills || 0) + (user.body_language || 0) + (user.listening_skills || 0) + (user.active_participation || 0)),
   };
 
   return (

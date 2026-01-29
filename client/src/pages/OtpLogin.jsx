@@ -52,7 +52,7 @@ export default function OtpLogin() {
       const res = await axios.post("http://localhost:5000/api/auth/verify-otp", { email, otp });
       const token = res.data.token;
       sessionStorage.setItem("token", token);
-      navigate("/dashboard");
+      navigate("/report"); // Redirect to Report page
     } catch (err) {
       alert(err.response?.data?.message || "Invalid OTP");
     } finally {
@@ -64,10 +64,18 @@ export default function OtpLogin() {
     <div className="min-h-screen bg-gray-100 flex items-center justify-center px-4 font-sans text-gray-900">
       <div className="w-full max-w-md bg-white rounded-2xl shadow-xl p-8 border border-gray-100">
 
-        {/* Logos */}
-        <div className="flex justify-between items-center mb-8">
-          <img src="/forese-logo.png" alt="Forese Logo" className="h-24 w-auto object-contain" />
-          <img src="/svce-logo.png" alt="SVCE Logo" className="h-14 w-auto object-contain" />
+        {/* Header */}
+        <div className="flex justify-between items-center mb-10 px-2 transition-all duration-300">
+          <img
+            src="/forese-logo.png"
+            alt="Forese Logo"
+            className="h-16 sm:h-20 md:h-24 w-auto object-contain"
+          />
+          <img
+            src="/svce-logo.png"
+            alt="SVCE Logo"
+            className="h-9 sm:h-12 md:h-14 w-auto object-contain"
+          />
         </div>
 
         {/* Icon */}

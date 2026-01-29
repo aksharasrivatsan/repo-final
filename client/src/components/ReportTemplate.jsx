@@ -67,9 +67,9 @@ const ReportTemplate = forwardRef(({ user }, ref) => {
             }}
         >
             {/* TOP LOGOS */}
-            <div style={{ display: "flex", justifyContent: "space-between", marginBottom: 10, alignItems: "center" }}>
-                <img src={foreseBase64 || foreselogo} alt="Forese" style={{ height: 80 }} />
-                <img src={svceBase64 || svcelogo} alt="SVCE" style={{ height: 40 }} />
+            <div style={{ display: "flex", justifyContent: "space-between", marginBottom: 15, alignItems: "center" }}>
+                <img src={foreseBase64 || foreselogo} alt="Forese" style={{ height: 60, width: "auto", objectFit: "contain" }} />
+                <img src={svceBase64 || svcelogo} alt="SVCE" style={{ height: 60, width: "auto", objectFit: "contain" }} />
             </div>
 
             {/* TITLE SECTION */}

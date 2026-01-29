@@ -19,7 +19,7 @@ export default function Login() {
         { email }
       );
 
-      setOtpSent(true); 
+      setOtpSent(true);
       console.log("OTP sent successfully");
     } catch (err) {
       console.error(err);
@@ -35,8 +35,8 @@ export default function Login() {
         { email, otp }
       );
 
-      localStorage.setItem("token", res.data.token);
-      navigate("/dashboard");
+      sessionStorage.setItem("token", res.data.token);
+      navigate("/report");
     } catch (err) {
       console.error(err);
       alert("Invalid OTP");
@@ -47,16 +47,10 @@ export default function Login() {
     <div className="min-h-screen bg-gray-100 flex items-center justify-center px-4">
       <div className="w-full max-w-md bg-white rounded-2xl shadow-lg p-6">
 
-        {/* Logos */}
+        {/* Header */}
         <div className="flex justify-between items-center mb-6">
-          <img src="/forese-logo.png" alt="Forese" className="h-18" />
-          <img
-  src="/svce-logo.png"
-  alt="SVCE"
-  className="h-12 max-w-[120px] object-contain"
-/>
-
-
+          <img src="/forese-logo.png" alt="Forese Logo" className="h-24 w-auto object-contain" />
+          <img src="/svce-logo.png" alt="SVCE Logo" className="h-14 w-auto object-contain" />
         </div>
 
         <div className="flex justify-center mb-4">

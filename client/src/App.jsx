@@ -1,6 +1,7 @@
 import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
 import OtpLogin from "./pages/OtpLogin";
 import Dashboard from "./pages/Dashboard";
+import Report from "./pages/Report";
 
 function App() {
   return (
@@ -8,6 +9,7 @@ function App() {
       <Routes>
         <Route path="/" element={<OtpLogin />} />
         <Route path="/dashboard" element={<Dashboard />} />
+        <Route path="/report" element={<Report />} />
       </Routes>
     </Router>
   );
