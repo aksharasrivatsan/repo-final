@@ -74,7 +74,7 @@ export default function Dashboard() {
 
       // 1. HEADER
       if (foreseBase64) pdf.addImage(foreseBase64, "PNG", margin, currentY, 25, 25);
-      if (svceBase64) pdf.addImage(svceBase64, "PNG", pageWidth - margin - 25, currentY + 5, 25, 12);
+      if (svceBase64) pdf.addImage(svceBase64, "PNG", pageWidth - margin - 40, currentY + 5, 40, 18);
       currentY += 35;
 
       // 2. TITLE

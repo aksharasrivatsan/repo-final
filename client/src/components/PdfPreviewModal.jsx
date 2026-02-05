@@ -64,7 +64,7 @@ export default function PdfPreviewModal({ isOpen, onClose, user }) {
                 pdf.addImage(foreseBase64, "PNG", margin, currentY, 25, 25);
             }
             if (svceBase64) {
-                pdf.addImage(svceBase64, "PNG", pageWidth - margin - 25, currentY + 5, 25, 12);
+                pdf.addImage(svceBase64, "PNG", pageWidth - margin - 40, currentY + 5, 40, 18);
             }
             currentY += 30;
 
