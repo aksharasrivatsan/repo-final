@@ -1,10 +1,7 @@
-
-import { useEffect, useRef, useState } from "react";
+import React, { useEffect, useState } from "react";
 import { useLocation, Navigate, useNavigate } from "react-router-dom";
 import { LogOut, BarChart2, Download, User } from "lucide-react";
 import jsPDF from "jspdf";
-import html2canvas from "html2canvas";
-import ReportTemplate from "../components/ReportTemplate";
 
 export default function Dashboard() {
   const navigate = useNavigate();
@@ -17,7 +14,8 @@ export default function Dashboard() {
 
   const [user, setUser] = useState(null);
   const [isGeneratingPdf, setIsGeneratingPdf] = useState(false);
-  const reportRef = useRef(null);
+  const [foreseBase64, setForeseBase64] = useState("");
+  const [svceBase64, setSvceBase64] = useState("");
 
   //fetch
   useEffect(() => {
@@ -35,6 +33,19 @@ export default function Dashboard() {
           setData(res.data);
           setUser({ ...res.data.user, ...res.data.results });
           setLoading(false);
+
+          // Pre-fetch logos for PDF
+          const toBase64 = async (url, setter) => {
+            try {
+              const res = await fetch(url);
+              const blob = await res.blob();
+              const reader = new FileReader();
+              reader.onloadend = () => setter(reader.result);
+              reader.readAsDataURL(blob);
+            } catch (e) { console.error("Logo fetch failed", e); }
+          };
+          toBase64("/forese-logo.png", setForeseBase64);
+          toBase64("/svce-logo.png", setSvceBase64);
         })
         .catch(err => {
           console.error(err);
@@ -49,33 +60,158 @@ export default function Dashboard() {
   };
 
   const handleDownloadPdf = async () => {
-    if (!reportRef.current) return;
     setIsGeneratingPdf(true);
     try {
-
-      await new Promise(resolve => setTimeout(resolve, 100));
-
-      const canvas = await html2canvas(reportRef.current, {
-        scale: 2,
-        useCORS: true,
-        backgroundColor: "#ffffff",
-        windowWidth: 794,
-        windowHeight: 1123,
-      });
-
-      const imgData = canvas.toDataURL("image/png");
       const pdf = new jsPDF("p", "mm", "a4");
+      const pageWidth = pdf.internal.pageSize.getWidth();
+      const margin = 15;
+      let currentY = 15;
 
-      const pdfWidth = pdf.internal.pageSize.getWidth();
-      const pdfHeight = pdf.internal.pageSize.getHeight();
+      // Calculate totals
+      const totalApt = (user.aptitude || 0) + (user.core || 0) + (user.verbal || 0) + (user.programming || 0) + (user.comprehension || 0);
+      const totalGD = (user.subject_knowledge || 0) + (user.communication_skills || 0) + (user.body_language || 0) + (user.listening_skills || 0) + (user.active_participation || 0);
+      const overall = totalApt + totalGD;
 
-      const imgProps = pdf.getImageProperties(imgData);
-      const ratio = Math.min(pdfWidth / imgProps.width, pdfHeight / imgProps.height);
-      const w = imgProps.width * ratio;
-      const h = imgProps.height * ratio;
-      const x = (pdfWidth - w) / 2;
+      // 1. HEADER
+      if (foreseBase64) pdf.addImage(foreseBase64, "PNG", margin, currentY, 25, 25);
+      if (svceBase64) pdf.addImage(svceBase64, "PNG", pageWidth - margin - 25, currentY + 5, 25, 12);
+      currentY += 35;
 
-      pdf.addImage(imgData, "PNG", x, 0, w, h);
+      // 2. TITLE
+      pdf.setFillColor(238, 242, 255); // #eef2ff circle
+      pdf.circle(pageWidth / 2, currentY - 12, 10, "F");
+
+      // Draw a solid graduation cap
+      pdf.setFillColor(79, 70, 229); // #4f46e5
+
+      // Cap Diamond (Top)
+      pdf.lines(
+        [
+          [6, 3],   // to right-mid
+          [-6, 3],  // to bottom
+          [-6, -3], // to left-mid
+          [6, -3]   // back to top
+        ],
+        pageWidth / 2, currentY - 17, [1, 1], "F"
+      );
+
+      // Cap Base
+      pdf.roundedRect(pageWidth / 2 - 2.5, currentY - 14, 5, 3.5, 0.5, 0.5, "F");
+
+      // Tassel
+      pdf.setDrawColor(255, 255, 255);
+      pdf.setLineWidth(0.4);
+      pdf.line(pageWidth / 2 - 1, currentY - 13, pageWidth / 2 - 2, currentY - 11);
+
+      pdf.setFont("helvetica", "bold");
+      pdf.setFontSize(22);
+      pdf.setTextColor(0, 0, 0);
+      pdf.text("Mocks '26", pageWidth / 2, currentY + 4, { align: "center" });
+      currentY += 14;
+      pdf.setFont("helvetica", "normal");
+      pdf.setFontSize(14);
+      pdf.setTextColor(100, 116, 139);
+      pdf.text("Performance Overview", pageWidth / 2, currentY, { align: "center" });
+      currentY += 15;
+
+      // 3. STUDENT INFO CARD
+      pdf.setDrawColor(226, 232, 240);
+      pdf.setFillColor(255, 255, 255);
+      pdf.roundedRect(margin, currentY, pageWidth - (margin * 2), 35, 3, 3, "FD");
+      pdf.setFont("helvetica", "bold");
+      pdf.setFontSize(9);
+      pdf.setTextColor(79, 70, 229);
+      pdf.text("STUDENT INFORMATION", margin + 6, currentY + 8);
+      pdf.setFontSize(10);
+      pdf.setTextColor(100, 116, 139);
+      const midPoint = pageWidth / 2;
+      pdf.setFont("helvetica", "normal");
+      pdf.text("Name:", margin + 6, currentY + 18);
+      pdf.text("Reg No:", midPoint + 10, currentY + 18);
+      pdf.text("Mocks'26 ID:", margin + 6, currentY + 28);
+      pdf.text("Dept:", midPoint + 10, currentY + 28);
+      pdf.setFont("helvetica", "bold");
+      pdf.setTextColor(30, 41, 59);
+      pdf.text(user.name, margin + 45, currentY + 18);
+      pdf.text(user.regno, pageWidth - margin - 6, currentY + 18, { align: "right" });
+      pdf.text(`MOCK26${String(user.id).padStart(3, "0")}`, margin + 45, currentY + 28);
+      pdf.text(user.dept, pageWidth - margin - 6, currentY + 28, { align: "right" });
+      currentY += 48;
+
+      // 4. TABLES HELPER
+      const drawTable = (rows, total, y) => {
+        const tableW = pageWidth - margin * 2;
+        pdf.setDrawColor(229, 231, 235);
+        pdf.setFillColor(248, 250, 252);
+        pdf.rect(margin, y, tableW, 8, "FD");
+        pdf.setFontSize(8);
+        pdf.setTextColor(100, 116, 139);
+        pdf.text("ASSESSMENT CATEGORY", margin + 4, y + 5.5);
+        pdf.text("SCORE", pageWidth - margin - 4, y + 5.5, { align: "right" });
+        let rowY = y + 8;
+        pdf.setFontSize(9);
+        rows.forEach(([label, score]) => {
+          pdf.setFont("helvetica", "normal");
+          pdf.setTextColor(30, 41, 59);
+          pdf.line(margin, rowY, pageWidth - margin, rowY);
+          pdf.text(label, margin + 4, rowY + 6);
+          pdf.setFont("helvetica", "bold");
+          pdf.text(`${score} / 10`, pageWidth - margin - 4, rowY + 6, { align: "right" });
+          rowY += 9;
+        });
+        pdf.setFillColor(241, 245, 249);
+        pdf.rect(margin, rowY, tableW, 9, "F");
+        pdf.setFont("helvetica", "bold");
+        pdf.text("Section Total", margin + 4, rowY + 6);
+        pdf.text(`${total} / 50`, pageWidth - margin - 4, rowY + 6, { align: "right" });
+        return rowY + 9;
+      };
+
+      // APT TABLE
+      pdf.setFont("helvetica", "bold");
+      pdf.setFontSize(13);
+      pdf.setTextColor(30, 41, 59);
+      pdf.text("Aptitude Scores", margin + 5, currentY);
+      currentY += 5;
+      currentY = drawTable([
+        ["Aptitude", user.aptitude],
+        ["Core Knowledge", user.core],
+        ["Verbal Ability", user.verbal],
+        ["Programming Skills", user.programming],
+        ["Comprehension", user.comprehension]
+      ], totalApt, currentY);
+      currentY += 12;
+
+      // GD TABLE
+      pdf.setFont("helvetica", "bold");
+      pdf.setFontSize(13);
+      pdf.text("Group Discussion", margin + 5, currentY);
+      currentY += 5;
+      currentY = drawTable([
+        ["Subject Knowledge", user.subject_knowledge],
+        ["Communication Skills", user.communication_skills],
+        ["Body Language", user.body_language],
+        ["Listening Skills", user.listening_skills],
+        ["Active Participation", user.active_participation]
+      ], totalGD, currentY);
+      currentY += 2;
+
+      // 5. OVERALL SCORE
+      pdf.setFillColor(79, 70, 229);
+      pdf.roundedRect(margin, currentY, pageWidth - margin * 2, 22, 4, 4, "F");
+      pdf.setTextColor(255, 255, 255);
+      pdf.setFontSize(8);
+      pdf.text("OVERALL PERFORMANCE", pageWidth / 2, currentY + 6, { align: "center" });
+      pdf.setFontSize(22);
+      pdf.text(`${overall}`, pageWidth / 2 - 4, currentY + 16, { align: "center" });
+      pdf.setFontSize(10);
+      pdf.text("/ 100", pageWidth / 2 + 10, currentY + 16);
+
+      // FOOTER
+      pdf.setTextColor(148, 163, 184);
+      pdf.setFontSize(7);
+      //pdf.text(`© 2026 SVCE • Mock Examination Report • Generated on ${new Date().toLocaleDateString()}`, pageWidth / 2, 282, { align: "center" });
+
       pdf.save(`Mock_Report_${user.regno}.pdf`);
     } catch (err) {
       console.error("PDF generation failed", err);
@@ -96,10 +232,6 @@ export default function Dashboard() {
   return (
     <div className="min-h-screen bg-gray-50 px-4 md:px-10 py-6 font-sans text-gray-900">
 
-      {/* Hidden Report Template for generation */}
-      <div style={{ position: "absolute", top: 0, left: 0, zIndex: -50, visibility: "visible", opacity: 0.1 }}>
-        <ReportTemplate ref={reportRef} user={user} />
-      </div>
 
       {/* Header */}
       <div className="flex justify-between items-center mb-6">
