@@ -52,8 +52,8 @@ export default function Aptitude({ data: aptData }) {
     scales: {
       y: {
         beginAtZero: true,
-        max: 10,
-        ticks: { stepSize: 2 },
+        max: 20,
+        ticks: { stepSize: 4 },
         grid: { color: "rgba(0,0,0,0.05)" },
       },
       x: {
@@ -89,10 +89,10 @@ export default function Aptitude({ data: aptData }) {
         {/* Score list */}
         <div className="mt-4 lg:mt-0 space-y-4">
           <ScoreRow label="Aptitude" value={`${aptData.aptitude || 0}/10`} />
-          <ScoreRow label="Core" value={`${aptData.core || 0}/10`} />
-          <ScoreRow label="Verbal" value={`${aptData.verbal || 0}/10`} />
+          <ScoreRow label="Core" value={`${aptData.core || 0}/20`} />
+          <ScoreRow label="Verbal" value={`${aptData.verbal || 0}/5`} />
           <ScoreRow label="Programming" value={`${aptData.programming || 0}/10`} />
-          <ScoreRow label="Comprehension" value={`${aptData.comprehension || 0}/10`} />
+          <ScoreRow label="Comprehension" value={`${aptData.comprehension || 0}/5`} />
 
           {/* Mobile total */}
           <div className="lg:hidden text-center pt-3 font-semibold text-sm border-t border-gray-200">
@@ -106,7 +106,7 @@ export default function Aptitude({ data: aptData }) {
 
 function ScoreRow({ label, value }) {
   return (
-    <div className="flex justify-between items-center text-sm">
+    <div className="flex justify-between items-center text-sm border-b border-gray-100 last:border-none pb-3 last:pb-0">
       <span className="text-gray-500">{label}</span>
       <span className="font-semibold">{value}</span>
     </div>

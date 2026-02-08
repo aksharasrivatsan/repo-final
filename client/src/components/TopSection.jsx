@@ -13,13 +13,6 @@ export default function TopSection({ profile, user }) {
 
             {/* mobile header */}
             <div className="flex items-center justify-between mb-6">
-              <button
-                onClick={() => navigate('/dashboard', { state: user })}
-                className="w-10 h-10 flex items-center justify-center rounded-xl hover:bg-white/10 transition cursor-pointer"
-              >
-                <span className="material-icons">arrow_back</span>
-              </button>
-
               <h1 className="text-sm font-semibold">
                 Report Dashboard
               </h1>
@@ -58,13 +51,6 @@ export default function TopSection({ profile, user }) {
           {/* desktop header */}
           <div className="hidden lg:flex items-center justify-between h-16">
             <div className="flex items-center gap-3">
-              <button
-                onClick={() => navigate('/dashboard', { state: user })}
-                className="w-10 h-10 flex items-center justify-center rounded-xl hover:bg-white/10 transition cursor-pointer"
-              >
-                <span className="material-icons">arrow_back</span>
-              </button>
-
               <h1 className="text-lg font-semibold">
                 Report Dashboard
               </h1>
@@ -82,29 +68,6 @@ export default function TopSection({ profile, user }) {
         </div>
       </div>
 
-      {/* desktop profile card */}
-      <div className="hidden lg:block px-8 mt-4">
-        <div className="bg-white rounded-2xl px-6 py-5 w-[30%] max-w-full shadow-sm mr-auto">
-
-          <div className="flex flex-col items-center text-center">
-            <div className="w-18 h-18 rounded-full bg-green-300 flex items-center justify-center text-xl font-bold text-black mb-2">
-              {profile.username[0]}
-            </div>
-
-            <h2 className="font-semibold text-lg leading-tight">
-              {profile.username}
-            </h2>
-
-            <p className="text-sm text-gray-500 mt-1">
-              {profile.dept}
-            </p>
-
-            <span className="mt-2 px-3 py-1 text-xs rounded-full bg-green-500 text-white">
-              Reg: {profile.regNo}
-            </span>
-          </div>
-        </div>
-      </div>
     </>
   );
 }

@@ -64,160 +64,183 @@ export default function PdfPreviewModal({ isOpen, onClose, user }) {
         try {
             const pdf = new jsPDF("p", "mm", "a4");
             const pageWidth = pdf.internal.pageSize.getWidth();
-            const margin = 20;
-            let currentY = 20;
+            const margin = 15; 
+            let currentY = 12; 
 
-            // 1. HEADER (LOGOS)
+            
+            const logoY = 7;
             if (foreseBase64) {
-                pdf.addImage(foreseBase64, "PNG", margin, currentY, 25, 25);
+                pdf.addImage(foreseBase64, "PNG", margin, logoY, 26, 26);
             }
             if (svceBase64) {
-                pdf.addImage(svceBase64, "PNG", pageWidth - margin - 40, currentY + 5, 40, 18);
+                pdf.addImage(svceBase64, "PNG", pageWidth - margin - 50, logoY + 6, 50, 14);
             }
-            currentY += 30;
+            currentY = logoY + 28;
 
-            // 2. TITLE
+
             pdf.setFont("helvetica", "bold");
-            pdf.setFontSize(22);
+            pdf.setFontSize(26); // Increased size
             pdf.setTextColor(0, 0, 0);
             pdf.text("Mocks '26", pageWidth / 2, currentY + 4, { align: "center" });
-            currentY += 12;
+            currentY += 10;
             pdf.setFont("helvetica", "normal");
-            pdf.setFontSize(14);
-            pdf.setTextColor(71, 85, 105); // #475569 (Dark gray)
+            pdf.setFontSize(15); // Increased size
+            pdf.setTextColor(71, 85, 105);
             pdf.text("Performance Overview", pageWidth / 2, currentY, { align: "center" });
-            currentY += 12;
+            currentY += 8;
 
-            // 3. STUDENT INFORMATION CARD
-            pdf.setDrawColor(226, 232, 240); // #e2e8f0
+            pdf.setDrawColor(226, 232, 240);
             pdf.setFillColor(255, 255, 255);
-            pdf.roundedRect(margin, currentY, pageWidth - (margin * 2), 35, 3, 3, "FD");
+            pdf.roundedRect(margin, currentY, pageWidth - (margin * 2), 42, 4, 4, "FD"); // Taller card
 
             pdf.setFont("helvetica", "bold");
-            pdf.setFontSize(9);
-            pdf.setTextColor(30, 41, 59); // #1e293b (Now black/dark)
-            pdf.text("STUDENT INFORMATION", margin + 6, currentY + 8);
+            pdf.setFontSize(10); // Slightly larger
+            pdf.setTextColor(30, 41, 59);
+            pdf.text("STUDENT INFORMATION", margin + 6, currentY + 11);
 
-            pdf.setFontSize(10);
+            pdf.setFontSize(11); // Larger text
             pdf.setTextColor(100, 116, 139);
             const midPoint = pageWidth / 2;
 
             // Info Row 1
             pdf.setFont("helvetica", "normal");
-            pdf.text("Name:", margin + 6, currentY + 18);
+            pdf.text("Name:", margin + 8, currentY + 22);
+            let labelWidth = pdf.getTextWidth("Name: ");
             pdf.setFont("helvetica", "bold");
             pdf.setTextColor(30, 41, 59);
-            pdf.text(String(user.name || "-"), margin + 45, currentY + 18);
+            pdf.text(String(user.name || "-"), margin + 8 + labelWidth, currentY + 22);
 
             pdf.setFont("helvetica", "normal");
             pdf.setTextColor(100, 116, 139);
-            pdf.text("Reg No:", midPoint + 10, currentY + 18);
+            pdf.text("Reg No:", midPoint + 10, currentY + 22);
+            labelWidth = pdf.getTextWidth("Reg No: ");
             pdf.setFont("helvetica", "bold");
             pdf.setTextColor(30, 41, 59);
-            pdf.text(String(user.regno || "-"), pageWidth - margin - 6, currentY + 18, { align: "right" });
+            pdf.text(String(user.regno || "-"), midPoint + 10 + labelWidth, currentY + 22);
 
             // Info Row 2
             pdf.setFont("helvetica", "normal");
             pdf.setTextColor(100, 116, 139);
-            pdf.text("Email:", margin + 6, currentY + 28);
+            pdf.text("Email:", margin + 8, currentY + 34);
+            labelWidth = pdf.getTextWidth("Email: ");
             pdf.setFont("helvetica", "bold");
             pdf.setTextColor(30, 41, 59);
-            pdf.text(String(user.email || "-"), margin + 45, currentY + 28);
+            pdf.text(String(user.email || "-"), margin + 8 + labelWidth, currentY + 34);
 
             pdf.setFont("helvetica", "normal");
             pdf.setTextColor(100, 116, 139);
-            pdf.text("Dept:", midPoint + 10, currentY + 28);
+            pdf.text("Dept:", midPoint + 10, currentY + 34);
+            labelWidth = pdf.getTextWidth("Dept: ");
             pdf.setFont("helvetica", "bold");
             pdf.setTextColor(30, 41, 59);
-            pdf.text(String(user.dept || "-"), pageWidth - margin - 6, currentY + 28, { align: "right" });
+            pdf.text(String(user.dept || "-"), midPoint + 10 + labelWidth, currentY + 34);
 
-            currentY += 40;
+            currentY += 52; 
 
-            // 4. APTITUDE TABLE
             pdf.setFont("helvetica", "bold");
-            pdf.setFontSize(13);
+            pdf.setFontSize(15); // Larger size
             pdf.setTextColor(30, 41, 59);
-            pdf.text("Aptitude Scores", margin + 5, currentY);
-            currentY += 5;
+            pdf.text("General Aptitude", margin + 1, currentY);
+            currentY += 6;
 
             const drawTable = (title, rows, total, y) => {
                 const tableW = pageWidth - (margin * 2);
+                const headerH = 9;
+                const rowH = 9.5;    
+                const footerH = 10;
+                const tableH = headerH + (rows.length * rowH) + footerH;
+
+                // Outer Boarder (Rounded)
                 pdf.setDrawColor(229, 231, 235);
+                pdf.setLineWidth(0.2);
+                pdf.roundedRect(margin, y, tableW, tableH, 3, 3, "S");
+
                 pdf.setFillColor(248, 250, 252);
-                pdf.rect(margin, y, tableW, 8, "FD");
+                pdf.roundedRect(margin, y, tableW, headerH, 3, 3, "F");
+                pdf.rect(margin, y + 5, tableW, 5, "F");
 
-                pdf.setFontSize(8);
+                pdf.setFontSize(10);
                 pdf.setTextColor(100, 116, 139);
-                pdf.text("ASSESSMENT CATEGORY", margin + 4, y + 5.5);
-                pdf.text("SCORE", pageWidth - margin - 4, y + 5.5, { align: "right" });
+                pdf.text("ASSESSMENT CATEGORY", margin + 6, y + 6.5);
+                pdf.text("SCORE", pageWidth - margin - 6, y + 6.5, { align: "right" });
 
-                let rowY = y + 8;
+                let rowY = y + headerH;
                 pdf.setFont("helvetica", "normal");
-                pdf.setFontSize(9);
-                pdf.setTextColor(30, 41, 59);
+                pdf.setFontSize(11.5); // Slightly larger
+                pdf.setTextColor(47, 85, 105);
 
-                rows.forEach(([label, score]) => {
+                rows.forEach(([label, score, max]) => {
                     pdf.setDrawColor(241, 245, 249);
                     pdf.line(margin, rowY, pageWidth - margin, rowY);
-                    pdf.text(String(label || ""), margin + 4, rowY + 6);
+
+                    pdf.setTextColor(71, 85, 105);
+                    pdf.text(String(label || ""), margin + 6, rowY + 7);
                     pdf.setFont("helvetica", "bold");
-                    pdf.text(`${Number(score || 0)} / 10`, pageWidth - margin - 4, rowY + 6, { align: "right" });
+                    pdf.setTextColor(30, 41, 59);
+                    pdf.text(`${Number(score || 0)} / ${max || 10}`, pageWidth - margin - 6, rowY + 7, { align: "right" });
                     pdf.setFont("helvetica", "normal");
-                    rowY += 8;
+                    rowY += rowH;
                 });
 
                 pdf.setFillColor(241, 245, 249);
-                pdf.rect(margin, rowY, tableW, 9, "F");
-                pdf.setFont("helvetica", "bold");
-                pdf.text("Section Total", margin + 4, rowY + 6);
-                pdf.text(`${Number(total || 0)} / 50`, pageWidth - margin - 4, rowY + 6, { align: "right" });
+                pdf.roundedRect(margin, rowY, tableW, footerH, 3, 3, "F");
+                pdf.rect(margin, rowY, tableW, 5, "F");
 
-                return rowY + 9;
+                pdf.setFont("helvetica", "bold");
+                pdf.setTextColor(30, 41, 59);
+                pdf.setFontSize(11.5);
+                pdf.text("Section Total", margin + 6, rowY + 5.5);
+                pdf.text(`${Number(total || 0)} / 50`, pageWidth - margin - 6, rowY + 5.5, { align: "right" });
+
+                return rowY + footerH;
             };
 
             const aptRows = [
-                ["Aptitude", aptitudeScores.aptitude],
-                ["Core Knowledge", aptitudeScores.core],
-                ["Verbal Ability", aptitudeScores.verbal],
-                ["Programming Skills", aptitudeScores.programming],
-                ["Comprehension", aptitudeScores.comprehension]
+                ["Aptitude", aptitudeScores.aptitude, 10],
+                ["Core", aptitudeScores.core, 20],
+                ["Verbal", aptitudeScores.verbal, 5],
+                ["Programming", aptitudeScores.programming, 10],
+                ["Comprehension", aptitudeScores.comprehension, 5]
             ];
             currentY = drawTable("Aptitude Scores", aptRows, totalApt, currentY);
-            currentY += 10;
+            currentY += 10; 
 
-            // 5. GD TABLE
             pdf.setFont("helvetica", "bold");
-            pdf.setFontSize(13);
+            pdf.setFontSize(15);
             pdf.setTextColor(30, 41, 59);
-            pdf.text("Group Discussion", margin + 5, currentY);
-            currentY += 5;
+            pdf.text("Group Discussion", margin + 1, currentY);
+            currentY += 6;
 
             const gdRows = [
-                ["Subject Knowledge", gdScores.subject_knowledge],
-                ["Communication Skills", gdScores.communication_skills],
-                ["Body Language", gdScores.body_language],
-                ["Listening Skills", gdScores.listening_skills],
-                ["Active Participation", gdScores.active_participation]
+                ["Subject Knowledge", gdScores.subject_knowledge, 10],
+                ["Communication Skills", gdScores.communication_skills, 10],
+                ["Body Language", gdScores.body_language, 10],
+                ["Listening Skills", gdScores.listening_skills, 10],
+                ["Active Participation", gdScores.active_participation, 10]
             ];
             currentY = drawTable("Group Discussion", gdRows, totalGD, currentY);
-            currentY += 2;
+            currentY += 4;
 
-            // 6. OVERALL SCORE CARD
-            pdf.setDrawColor(0, 0,0);
-            pdf.setLineWidth(0.8);
-            pdf.roundedRect(margin, currentY, pageWidth - (margin * 2), 22, 2, 2, "S");
+            const scoreCardH = 28; 
+            const scoreCardW = pageWidth - (margin * 2);
 
-            pdf.setTextColor(0, 0, 0);
+
+            pdf.setFillColor(248, 250, 252);
+            pdf.roundedRect(margin, currentY, scoreCardW, scoreCardH, 4, 4, "F");
+
+            pdf.setDrawColor(226, 232, 240);
+            pdf.setLineWidth(0.4);
+            pdf.roundedRect(margin, currentY, scoreCardW, scoreCardH, 4, 4, "S");
+
+            pdf.setTextColor(100, 116, 139);
             pdf.setFont("helvetica", "bold");
-            pdf.setFontSize(8);
-            pdf.text("OVERALL PERFORMANCE", pageWidth / 2, currentY + 7, { align: "center" });
-
-            pdf.setFontSize(22);
-            pdf.text(`${overall}`, pageWidth / 2 - 4, currentY + 16, { align: "center" });
             pdf.setFontSize(10);
-            pdf.text("/ 100", pageWidth / 2 + 10, currentY + 16);
-            // 7. FOOTER
-            pdf.setTextColor(148, 163, 184); // #94a3b8
+            pdf.text("OVERALL PERFORMANCE", pageWidth / 2, currentY + 8, { align: "center" });
+
+            pdf.setTextColor(15, 23, 42);
+            pdf.setFontSize(28);
+            pdf.text(`${overall} / 100`, pageWidth / 2, currentY + 20, { align: "center" });
+            pdf.setTextColor(148, 163, 184); 
             pdf.setFontSize(7);
             //pdf.text(`© 2026 SVCE • Mock Examination Report • Generated on ${new Date().toLocaleDateString()}`, pageWidth / 2, 282, { align: "center" });
 
@@ -242,7 +265,7 @@ export default function PdfPreviewModal({ isOpen, onClose, user }) {
             <div className="bg-white rounded-xl w-full max-w-5xl shadow-xl flex flex-col h-[90vh]">
 
                 {/* HEADER */}
-                <div className="flex justify-between items-center p-4 border-b">
+                <div className="flex justify-between items-center p-4">
                     <h2 className="font-semibold text-lg">Report Preview</h2>
                     <button onClick={onClose}>
                         <XMarkIcon className="w-6 h-6 text-gray-500" />
@@ -250,11 +273,16 @@ export default function PdfPreviewModal({ isOpen, onClose, user }) {
                 </div>
 
                 {/* CONTENT */}
+<<<<<<< HEAD
                 <div className="bg-gray-100 p-2 sm:p-4 overflow-auto flex-1 flex justify-center items-start">
+=======
+                <div className="bg-gray-200/50 p-8 overflow-auto flex-1 flex justify-center">
+>>>>>>> 04deeb3864372def2518b1cfba334efc2afc1a8e
                     <div
                         ref={pdfRef}
                         className = "w-full sm:w-auto"
                         style={{
+<<<<<<< HEAD
                             maxwidth: "210mm",
                             minheight: "297mm",
                             backgroundColor: "#ffffff",
@@ -262,26 +290,36 @@ export default function PdfPreviewModal({ isOpen, onClose, user }) {
                             boxSizing: "border-box",
                             transform: "scale(1)",
                             transformOrigin: "top center"
+=======
+                            width: "210mm",
+                            minHeight: "297mm",
+                            backgroundColor: "#ffffff",
+                            padding: "8mm 20mm 20mm 20mm", 
+                            boxSizing: "border-box",
+                            boxShadow: "0 10px 25px -5px rgba(0, 0, 0, 0.1), 0 8px 10px -6px rgba(0, 0, 0, 0.1)",
+                            display: "flex",
+                            flexDirection: "column",
+>>>>>>> 04deeb3864372def2518b1cfba334efc2afc1a8e
                         }}
                     >
-                        {/* LOGOS (LIFTED UP) */}
-                        <div style={{ display: "flex", justifyContent: "space-between", marginBottom: 6 }}>
-                            <img src={foreseBase64 || foreselogo} alt="Forese" style={{ height: 70 }} />
-                            <img src={svceBase64 || svcelogo} alt="SVCE" style={{ height: 36 }} />
+                        {/* LOGOS (Aligned and balanced) */}
+                        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "5mm" }}>
+                            <img src={foreseBase64 || foreselogo} alt="Forese" style={{ height: "16mm", width: "auto", objectFit: "contain" }} />
+                            <img src={svceBase64 || svcelogo} alt="SVCE" style={{ height: "10mm", width: "auto", objectFit: "contain" }} />
                         </div>
 
                         {/* TITLE (TIGHTER) */}
-                        <div style={{ textAlign: "center", marginBottom: 20 }}>
-                            <h1 style={{ fontSize: 32, fontWeight: 800, margin: 0, color: "#000000" }}>Mocks ’26</h1>
-                            <p style={{ color: "#475569", marginTop: 4, fontSize: 16 }}>Performance Overview</p>
+                        <div style={{ textAlign: "center", marginBottom: 12 }}>
+                            <h1 style={{ fontSize: 26, fontWeight: 800, margin: 0, color: "#000000" }}>Mocks ’26</h1>
+                            <p style={{ color: "#475569", marginTop: 2, fontSize: 13 }}>Performance Overview</p>
                         </div>
 
                         {/* STUDENT INFORMATION */}
                         <div style={{
                             border: "1px solid #e2e8f0",
-                            borderRadius: 14,
-                            padding: "16px 24px",
-                            marginBottom: 20,
+                            borderRadius: 12,
+                            padding: "12px 20px",
+                            marginBottom: 16,
                             backgroundColor: "#ffffff",
                             boxShadow: "0 1px 2px 0 rgba(0, 0, 0, 0.05)"
                         }}>
@@ -306,19 +344,19 @@ export default function PdfPreviewModal({ isOpen, onClose, user }) {
                                 fontSize: 13,
                                 color: "#1e293b"
                             }}>
-                                <div style={{ display: "flex", justifyContent: "space-between" }}>
+                                <div style={{ display: "flex", gap: 6 }}>
                                     <span style={{ color: "#64748b" }}>Name:</span>
                                     <span style={{ fontWeight: 700, color: "#1e293b" }}>{user.name}</span>
                                 </div>
-                                <div style={{ display: "flex", justifyContent: "space-between" }}>
+                                <div style={{ display: "flex", gap: 6 }}>
                                     <span style={{ color: "#64748b" }}>Reg No:</span>
                                     <span style={{ fontWeight: 700, color: "#1e293b" }}>{user.regno}</span>
                                 </div>
-                                <div style={{ display: "flex", justifyContent: "space-between" }}>
+                                <div style={{ display: "flex", gap: 6 }}>
                                     <span style={{ color: "#64748b" }}>Email:</span>
                                     <span style={{ fontWeight: 700, color: "#1e293b" }}>{user.email}</span>
                                 </div>
-                                <div style={{ display: "flex", justifyContent: "space-between" }}>
+                                <div style={{ display: "flex", gap: 6 }}>
                                     <span style={{ color: "#64748b" }}>Dept:</span>
                                     <span style={{ fontWeight: 700, color: "#1e293b" }}>{user.dept}</span>
                                 </div>
@@ -326,7 +364,7 @@ export default function PdfPreviewModal({ isOpen, onClose, user }) {
                         </div>
 
                         {/* TABLES */}
-                        <div style={{ display: "flex", flexDirection: "column", gap: 20 }}>
+                        <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
                             <Section
                                 icon={<ChartBarIcon style={{ width: 18, height: 18, color: "#64748b" }} />}
                                 title="Aptitude Scores"
@@ -342,27 +380,28 @@ export default function PdfPreviewModal({ isOpen, onClose, user }) {
                             </Section>
                         </div>
 
-                        {/* OVERALL (PULLED UP) */}
+                        {/* OVERALL PERFORMANCE */}
                         <div
                             style={{
-                                marginTop: 24,
-                                border: "2px solid #000000",
-                                color: "black",
-                                padding: 20,
-                                borderRadius: 8,
+                                marginTop: 16,
+                                border: "1px solid #e2e8f0",
+                                background: "#f8fafc",
+                                color: "#1e293b",
+                                padding: "14px",
+                                borderRadius: 12,
                                 textAlign: "center",
                             }}
                         >
-                            <div style={{ fontSize: 13, fontWeight: 700, letterSpacing: "0.05em" }}>OVERALL PERFORMANCE</div>
-                            <div style={{ fontSize: 42, fontWeight: 800, marginTop: 4 }}>
-                                {overall} <span style={{ fontSize: 20, color: "#64748b" }}>/ 100</span>
+                            <div style={{ fontSize: 11, fontWeight: 700, letterSpacing: "0.05em", color: "#64748b", marginBottom: 4 }}>OVERALL PERFORMANCE</div>
+                            <div style={{ fontSize: 32, fontWeight: 800 }}>
+                                {overall} / 100
                             </div>
                         </div>
                     </div>
                 </div>
 
                 {/* FOOTER */}
-                <div className="p-4 border-t flex justify-end gap-3 bg-white rounded-b-xl">
+                <div className="p-4 flex justify-end gap-3 bg-white rounded-b-xl">
                     <button
                         onClick={onClose}
                         className="px-6 py-2.5 text-gray-700 font-medium hover:bg-gray-100 rounded-lg"
@@ -398,40 +437,40 @@ function Section({ icon, title, children }) {
 
 function AptitudeCard({ scores, total }) {
     const rows = [
-        ["Aptitude", scores.aptitude],
-        ["Core Knowledge", scores.core],
-        ["Verbal Ability", scores.verbal],
-        ["Programming Skills", scores.programming],
-        ["Comprehension", scores.comprehension],
+        ["General Aptitude", scores.aptitude, 10],
+        ["Core", scores.core, 20],
+        ["Verbal", scores.verbal, 5],
+        ["Programming", scores.programming, 10],
+        ["Comprehension", scores.comprehension, 5],
     ];
     return <ScoreTable header="ASSESSMENT CATEGORY" rows={rows} total={total} />;
 }
 
 function GDCard({ scores, total }) {
     const rows = [
-        ["Subject Knowledge", scores.subject_knowledge],
-        ["Communication Skills", scores.communication_skills],
-        ["Body Language", scores.body_language],
-        ["Listening Skills", scores.listening_skills],
-        ["Active Participation", scores.active_participation],
+        ["Subject Knowledge", scores.subject_knowledge, 10],
+        ["Communication Skills", scores.communication_skills, 10],
+        ["Body Language", scores.body_language, 10],
+        ["Listening Skills", scores.listening_skills, 10],
+        ["Active Participation", scores.active_participation, 10],
     ];
     return <ScoreTable header="EVALUATION CRITERIA" rows={rows} total={total} />;
 }
 
 function ScoreTable({ header, rows, total }) {
     return (
-        <div style={{ border: "1px solid #e5e7eb", borderRadius: 14, overflow: "hidden" }}>
-            <div style={{ display: "flex", justifyContent: "space-between", padding: 12, background: "#f8fafc", fontSize: 12, fontWeight: 700 }}>
+        <div style={{ border: "1px solid #e5e7eb", borderRadius: 12, overflow: "hidden" }}>
+            <div style={{ display: "flex", justifyContent: "space-between", padding: "8px 12px", background: "#f8fafc", fontSize: 11, fontWeight: 700, color: "#64748b" }}>
                 <span>{header}</span>
                 <span>SCORE</span>
             </div>
-            {rows.map(([label, val], i) => (
-                <div key={i} style={{ display: "flex", justifyContent: "space-between", padding: 12, borderTop: "1px solid #f1f5f9", fontSize: 13 }}>
-                    <span>{label}</span>
-                    <span style={{ fontWeight: 700 }}>{val} / 10</span>
+            {rows.map(([label, val, max], i) => (
+                <div key={i} style={{ display: "flex", justifyContent: "space-between", padding: "7.5px 12px", borderTop: "1px solid #f1f5f9", fontSize: 13, color: "#1e293b" }}>
+                    <span style={{ color: "#475569" }}>{label}</span>
+                    <span style={{ fontWeight: 700 }}>{val} / {max || 10}</span>
                 </div>
             ))}
-            <div style={{ display: "flex", justifyContent: "space-between", padding: 14, background: "#f1f5f9", fontWeight: 800 }}>
+            <div style={{ display: "flex", justifyContent: "space-between", padding: "9px 12px", background: "#f1f5f9", fontWeight: 800, color: "#1e293b", fontSize: 13.5 }}>
                 <span>Section Total</span>
                 <span>{total} / 50</span>
             </div>

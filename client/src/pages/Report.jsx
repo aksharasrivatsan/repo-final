@@ -20,21 +20,21 @@ export default function Report() {
 
   useEffect(() => {
     if (!user) {
-  const token = sessionStorage.getItem("token");
-  if (!token) {
-    navigate("/");
-    return;
-  }
+      const token = sessionStorage.getItem("token");
+      if (!token) {
+        navigate("/");
+        return;
+      }
 
-  try {
-    const decoded = jwtDecode(token);
-    setUser(decoded);
-    setLoading(false);
-  } catch (err) {
-    console.error("Invalid token", err);
-    navigate("/");
-  }
-}
+      try {
+        const decoded = jwtDecode(token);
+        setUser(decoded);
+        setLoading(false);
+      } catch (err) {
+        console.error("Invalid token", err);
+        navigate("/");
+      }
+    }
 
   }, [user, navigate]);
 
@@ -91,10 +91,28 @@ export default function Report() {
         }}
       />
 
-      <main className="px-4 -mt-16 lg:mt-6 relative z-20 pb-6">
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 lg:px-8">
+      <main className="px-4 lg:px-8 mt-6 relative z-20 pb-6">
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 lg:px-0">
           {/* LEFT COLUMN */}
-          <div className="hidden lg:block space-y-6 lg:-ml-8">
+          <div className="hidden lg:block space-y-6">
+            {/* desktop profile card */}
+            <div className="bg-white rounded-2xl border border-gray-200 shadow-sm p-6 w-[90%] max-w-full mt-1 mx-auto lg:mr-auto lg:ml-4">
+              <div className="flex flex-col items-center text-center">
+                <div className="w-20 h-20 rounded-full bg-green-300 flex items-center justify-center text-2xl font-bold text-black mb-3 border-4 border-gray-50">
+                  {data.profile.username[0]}
+                </div>
+                <h2 className="font-bold text-xl leading-tight text-gray-800">
+                  {data.profile.username}
+                </h2>
+                <p className="text-sm text-gray-500 mt-1 font-medium">
+                  {data.profile.dept}
+                </p>
+                <span className="mt-3 px-4 py-1.5 text-[11px] font-bold rounded-full bg-green-500 text-white shadow-sm uppercase tracking-wider">
+                  Reg: {data.profile.regNo}
+                </span>
+              </div>
+            </div>
+
             <TotalScore
               overall={data.overallTotal}
               aptitude={data.aptitude.total}
@@ -104,7 +122,7 @@ export default function Report() {
           </div>
 
           {/* RIGHT COLUMN */}
-          <div className="lg:col-span-2 space-y-6 lg:-ml-8 lg:-mt-[222px]">
+          <div className="lg:col-span-2 space-y-6 lg:-ml-8">
             <div className="lg:hidden">
               <TotalScore
                 overall={data.overallTotal}
